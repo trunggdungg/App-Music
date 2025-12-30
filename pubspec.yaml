@@ -34,7 +34,9 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-  flutter_svg: ^2.2.3 # For SVG rendering
+  convex_bottom_bar: ^3.2.0 # Để tạo thanh điều hướng dưới cùng
+  flutter_svg: ^2.2.3 # Để hiển thị hình ảnh SVG
+
 
 dev_dependencies:
   flutter_test:
