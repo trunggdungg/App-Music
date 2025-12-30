@@ -1,27 +1,35 @@
+// lib/presentation/screens/player/now_playing_screen.dart
+
 import 'package:flutter/material.dart';
+import '../../../data/models/song.dart';
 
 class NowPlayingScreen extends StatefulWidget {
-  final String songTitle;
-  final String artistName;
+  final Song song;
 
   const NowPlayingScreen({
     Key? key,
-    required this.songTitle,
-    required this.artistName,
+    required this.song,
   }) : super(key: key);
 
   @override
   State<NowPlayingScreen> createState() => _NowPlayingScreenState();
 }
-///why signal is right, but then you turn left
+
 class _NowPlayingScreenState extends State<NowPlayingScreen> {
   bool _isPlaying = true;
   bool _isFavorite = false;
   bool _isRepeat = false;
   bool _isShuffle = false;
 
-  double _currentPosition = 45.0; // giây
-  double _totalDuration = 180.0; // 3 phút
+  late double _currentPosition;
+  late double _totalDuration;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentPosition = 0;
+    _totalDuration = widget.song.duration.toDouble();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +38,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            //  Header với nút Back và More
+            // Header
             Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
@@ -49,7 +57,9 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.more_vert),
-                    onPressed: () {},
+                    onPressed: () {
+                      _showMoreOptions(context);
+                    },
                   ),
                 ],
               ),
@@ -60,13 +70,26 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
             // 🖼️ Album Art
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(24),
-                child: AspectRatio(/// cái này dùng để giữ tỉ lệ khung hình
-                  aspectRatio: 1,
-                  child: Image.network(
-                    "https://picsum.photos/400",
-                    fit: BoxFit.cover,/// ảnh sẽ phủ đầy khung hình nhưng vẫn giữ tỉ lệ
+              child: Hero(
+                tag: 'album_art_${widget.song.id}',
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: AspectRatio(
+                    aspectRatio: 1,
+                    child: Image.network(
+                      widget.song.albumArt,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: Colors.grey[300],
+                          child: const Icon(
+                            Icons.music_note,
+                            size: 80,
+                            color: Colors.grey,
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
@@ -87,7 +110,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              widget.songTitle,
+                              widget.song.title,
                               style: const TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
@@ -97,7 +120,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              widget.artistName,
+                              widget.song.artist,
                               style: TextStyle(
                                 fontSize: 16,
                                 color: Colors.grey[600],
@@ -105,6 +128,18 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
+                            if (widget.song.album != null) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                widget.song.album!,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[500],
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
                           ],
                         ),
                       ),
@@ -163,7 +198,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                               ),
                             ),
                             Text(
-                              _formatDuration(_totalDuration.toInt()),
+                              widget.song.durationFormatted,
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.grey[600],
@@ -207,8 +242,8 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
 
                       // Play/Pause
                       Container(
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF00BF6D),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF00BF6D),
                           shape: BoxShape.circle,
                         ),
                         child: IconButton(
@@ -261,10 +296,102 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
     );
   }
 
-  // 🕐 Format thời gian từ giây sang mm:ss
   String _formatDuration(int seconds) {
     int minutes = seconds ~/ 60;
     int remainingSeconds = seconds % 60;
-    return '${minutes.toString().padLeft(1, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
+    return '${minutes}:${remainingSeconds.toString().padLeft(2, '0')}';
+  }
+
+  void _showMoreOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.playlist_add),
+                title: const Text('Add to playlist'),
+                onTap: () {
+                  Navigator.pop(context);
+                  // TODO: Implement
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.share),
+                title: const Text('Share'),
+                onTap: () {
+                  Navigator.pop(context);
+                  // TODO: Implement
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.info_outline),
+                title: const Text('Song info'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showSongInfo(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showSongInfo(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Song Information'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _infoRow('Title', widget.song.title),
+              _infoRow('Artist', widget.song.artist),
+              if (widget.song.album != null)
+                _infoRow('Album', widget.song.album!),
+              if (widget.song.releaseYear != null)
+                _infoRow('Year', widget.song.releaseYear.toString()),
+              _infoRow('Duration', widget.song.durationFormatted),
+              if (widget.song.genres.isNotEmpty)
+                _infoRow('Genres', widget.song.genres.join(', ')),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _infoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 80,
+            child: Text(
+              '$label:',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          Expanded(
+            child: Text(value),
+          ),
+        ],
+      ),
+    );
   }
 }
