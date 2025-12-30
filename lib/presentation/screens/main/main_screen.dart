@@ -1,9 +1,11 @@
+// lib/presentation/screens/main/main_screen.dart
+
 import 'package:flutter/material.dart';
-import 'package:convex_bottom_bar/convex_bottom_bar.dart';
-import 'package:music_app/presentation/screens/player/now_playing_screen.dart';
+import '../../../data/models/song.dart';
 import '../home/home_screen.dart';
 import '../search/search_screen.dart';
 import '../library/library_screen.dart';
+import '../player/now_playing_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
@@ -15,11 +17,9 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
-  // Biến giả lập trạng thái phát nhạc
+  // Trạng thái phát nhạc với Song object
   bool _isPlaying = false;
-  String _currentSong = "No song playing";
-  String _currentArtist = "";
-
+  Song? _currentSong;
 
   void _onTabTapped(int index) {
     setState(() {
@@ -27,12 +27,11 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
-  // 🎵 Hàm giả lập khi user chọn bài hát (gọi từ HomeScreen)
-  void _playSong(String title, String artist) {
+  // Hàm phát nhạc nhận Song object
+  void _playSong(Song song) {
     setState(() {
       _isPlaying = true;
-      _currentSong = title;
-      _currentArtist = artist;
+      _currentSong = song;
     });
   }
 
@@ -42,27 +41,28 @@ class _MainScreenState extends State<MainScreen> {
       body: IndexedStack(
         index: _selectedIndex,
         children: [
-          HomeScreen(onSongTap: _playSong, // Truyền callback vào HomeScreen
-          ),
+          HomeScreen(onSongTap: _playSong),
           const SearchScreen(),
           const LibraryScreen(),
         ],
       ),
 
-      // 🎵 MINI PLAYER - Chỉ hiện khi đang phát nhạc
+      // Mini Player + Bottom Navigation
       bottomNavigationBar: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Mini Player
-          if (_isPlaying)
+          // 🎵 MINI PLAYER
+          if (_isPlaying && _currentSong != null)
             GestureDetector(
               onTap: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder:
-                        (context) =>
-                            NowPlayingScreen(songTitle: _currentSong,artistName: _currentArtist,)
-                    ));
-                print("Mở Now Playing Screen");
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => NowPlayingScreen(
+                      song: _currentSong!,
+                    ),
+                  ),
+                );
               },
               child: Container(
                 height: 64,
@@ -83,10 +83,18 @@ class _MainScreenState extends State<MainScreen> {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: Image.network(
-                        "https://picsum.photos/200",
+                        _currentSong!.albumArt,
                         width: 48,
                         height: 48,
                         fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            width: 48,
+                            height: 48,
+                            color: Colors.grey[300],
+                            child: const Icon(Icons.music_note),
+                          );
+                        },
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -98,7 +106,7 @@ class _MainScreenState extends State<MainScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            _currentSong,
+                            _currentSong!.title,
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
@@ -107,7 +115,7 @@ class _MainScreenState extends State<MainScreen> {
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
-                            _currentArtist,
+                            _currentSong!.artist,
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.grey[600],
@@ -145,36 +153,35 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ),
 
-          // ⚫ CONVEX BOTTOM BAR
+          // ⚫ BOTTOM NAVIGATION BAR
           BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          onTap: _onTabTapped,
-           /// màu icon khi được chọn
-              selectedItemColor: Colors.green,
+            currentIndex: _selectedIndex,
+            onTap: _onTabTapped,
+            selectedItemColor: Colors.green,
             items: [
-            BottomNavigationBarItem(
-              icon: Icon(
-                Icons.home,
-                color: _selectedIndex == 0 ? Colors.green : Colors.grey,
+              BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.home,
+                  color: _selectedIndex == 0 ? Colors.green : Colors.grey,
+                ),
+                label: 'Home',
               ),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(
-                Icons.search,
-                color: _selectedIndex == 1 ? Colors.green : Colors.grey,
+              BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.search,
+                  color: _selectedIndex == 1 ? Colors.green : Colors.grey,
+                ),
+                label: 'Search',
               ),
-              label: 'Search',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(
-                Icons.library_music,
-                color: _selectedIndex == 2 ? Colors.green : Colors.grey,
+              BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.library_music,
+                  color: _selectedIndex == 2 ? Colors.green : Colors.grey,
+                ),
+                label: 'Library',
               ),
-              label: 'Library',
-            ),
-          ],
-          )
+            ],
+          ),
         ],
       ),
     );
