@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:music_app/presentation/screens/main/main_screen.dart';
 
 import '../auth/login_screen.dart';
 import '../home/home_screen.dart';
@@ -20,7 +21,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       if (mounted) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => HomeScreen()), // Thay NextScreen() bằng màn hình tiếp theo của bạn
+          MaterialPageRoute(builder: (context) => MainScreen()), // Thay NextScreen() bằng màn hình tiếp theo của bạn
         );
       }
     });
