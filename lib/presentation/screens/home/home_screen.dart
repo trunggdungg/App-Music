@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import '../home/widgets/section_title.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  // ✅ Thêm callback để thông báo khi chọn bài hát
+  final Function(String title, String artist)? onSongTap;
+
+  const HomeScreen({Key? key, this.onSongTap}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +19,7 @@ class HomeScreen extends StatelessWidget {
             children: [
               const SizedBox(height: 16),
 
-              /// 🔰 Header
+              ///  Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -38,7 +41,7 @@ class HomeScreen extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              /// 🔍 Search box
+              ///  Search box
               TextField(
                 decoration: InputDecoration(
                   hintText: "Search songs, artists...",
@@ -59,18 +62,29 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 32),
 
               /// 🎧 Recently Played
-              SectionTitle(title: "Recently Played"),
+              const SectionTitle(title: "Recently Played"),
               const SizedBox(height: 12),
               SizedBox(
                 height: 160,
                 child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
+                  scrollDirection: Axis.horizontal,/// cho phép cuộn ngang
                   itemCount: 5,
                   separatorBuilder: (_, __) => const SizedBox(width: 12),
                   itemBuilder: (context, index) {
-                    return MusicCard(
-                      title: "Song ${index + 1}",
-                      artist: "Artist",
+                    return GestureDetector(
+                      onTap: () {
+                        // ✅ Gọi callback khi user click bài hát
+                        if (onSongTap != null) {
+                          onSongTap!(
+                            "Song ${index + 1}",
+                            "Artist Name",
+                          );
+                        }
+                      },
+                      child: MusicCard(
+                        title: "Song ${index + 1}",
+                        artist: "Artist",
+                      ),
                     );
                   },
                 ),
@@ -79,64 +93,36 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 32),
 
               /// 🌟 Recommended
-              SectionTitle(title: "Recommended For You"),
+              const SectionTitle(title: "Recommended For You"),
               const SizedBox(height: 12),
               Column(
                 children: List.generate(
                   5,
-                      (index) => MusicListTile(
-                    title: "Recommended Song ${index + 1}",
-                    artist: "Artist Name",
+                      (index) => GestureDetector(
+                    onTap: () {
+                      /// Gọi callback khi user click bài hát
+                      if (onSongTap != null) {
+                        onSongTap!(
+                          "Recommended Song ${index + 1}",
+                          "Artist Name",
+                        );
+                      }
+                    },
+                    child: MusicListTile(
+                      title: "Recommended Song ${index + 1}",
+                      artist: "Artist Name",
+                    ),
                   ),
                 ),
               ),
 
-              const SizedBox(height: 80), // space for mini player
+              const SizedBox(height: 100), // ✅ Tăng space cho ConvexBar + MiniPlayer
             ],
           ),
         ),
       ),
 
-      /// 🎵 Mini Player (UI only)
-      bottomNavigationBar: Container(
-        height: 64,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        decoration: const BoxDecoration(
-          color: Color(0xFFF5FCF9),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-        ),
-        child: Row(
-          children: [
-            const CircleAvatar(
-              backgroundImage: NetworkImage(
-                "https://picsum.photos/200",
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text(
-                    "Now Playing",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    "Artist name",
-                    style: TextStyle(fontSize: 12),
-                  ),
-                ],
-              ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.play_arrow),
-              color: const Color(0xFF00BF6D),
-              onPressed: () {},
-            ),
-          ],
-        ),
-      ),
+      // ❌ BỎ bottomNavigationBar (đã chuyển lên MainScreen)
     );
   }
 }
