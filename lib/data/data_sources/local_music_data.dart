@@ -56,8 +56,8 @@ class LocalMusicData {
       artist: 'Sơn Tùng M-TP',
       artistId: 'artist_1',
       albumArt: 'https://picsum.photos/300/300?random=1',
-      audioUrl: 'https://example.com/audio1.mp3',
-      duration: 245,
+      audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+
       // 4:05
       album: 'Single',
       releaseYear: 2022,

@@ -5,7 +5,7 @@ class Song {
   final String artistId;
   final String albumArt;
   final String audioUrl;
-  final int duration; // Duration in seconds
+  final int? duration; // Duration in seconds
   final String? album;
   final int? releaseYear;
   final List<String> genres;
@@ -17,7 +17,7 @@ class Song {
   required this.artistId,
   required this.albumArt,
   required this.audioUrl,
-  required this.duration,
+  this.duration,
   this.album,
   this.releaseYear,
   this.genres = const [],
@@ -82,9 +82,16 @@ class Song {
   }
 
   String get durationFormatted {
-    final minutes = duration ~/ 60;
-    final seconds = duration % 60;
-    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    if (duration == null) {
+      return '--:--'; // hoặc '00:00'
+    }
+
+    final minutes = duration! ~/ 60;
+    final seconds = duration! % 60;
+
+    return '${minutes.toString().padLeft(2, '0')}:'
+        '${seconds.toString().padLeft(2, '0')}';
   }
+
 
 }

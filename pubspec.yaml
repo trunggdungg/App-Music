@@ -36,7 +36,8 @@ dependencies:
   cupertino_icons: ^1.0.8
   convex_bottom_bar: ^3.2.0 # Để tạo thanh điều hướng dưới cùng
   flutter_svg: ^2.2.3 # Để hiển thị hình ảnh SVG
-
+  just_audio: ^0.10.5 # Để phát âm thanh
+  audio_session: ^0.2.2 # Để quản lý phiên âm thanh
 
 dev_dependencies:
   flutter_test:

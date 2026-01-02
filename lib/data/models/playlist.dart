@@ -54,7 +54,7 @@ class Playlist {
   }
 
   int get totalDuration {
-    return songs.fold(0, (sum, song) => sum + song.duration);
+    return songs.fold(0, (sum, song) => sum + song.duration!);
   }
 
   // Tổng số bài hát
