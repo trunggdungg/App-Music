@@ -19,23 +19,19 @@ class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
   final AudioPlayerService _audioService = AudioPlayerService();
 
-  // Trạng thái phát nhạc với Song object
-  bool _isPlaying = false;
-  Song? _currentSong;
-
-  @override
-  void dispose() {
-    // Không dispose audioService ở đây vì nó là singleton
-    super.dispose();
-  }
-
+  // @override
+  // void dispose() {
+  //   // Không dispose audioService ở đây vì nó là singleton
+  //   super.dispose();
+  // }
+/// Hàm xử lý khi nhấn vào tab ở Bottom Navigation Bar
   void _onTabTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
 
-  // Hàm phát nhạc nhận Song object
+  /// Hàm phát nhạc nhận Song object
   void _playSong(Song song) async {
     try {
       await _audioService.playSong(song);
@@ -102,7 +98,7 @@ class _MainScreenState extends State<MainScreen> {
                       ),
                       child: Row(
                         children: [
-                          // Album art
+                          /// image album art
                           ClipRRect(
                             borderRadius: BorderRadius.circular(8),
                             child: Image.network(
@@ -122,7 +118,7 @@ class _MainScreenState extends State<MainScreen> {
                           ),
                           const SizedBox(width: 12),
 
-                          // Song info
+                          /// thông tin bài hát
                           Expanded(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -150,7 +146,7 @@ class _MainScreenState extends State<MainScreen> {
                             ),
                           ),
 
-                          // Play/Pause button
+                          /// Play/Pause button
                           IconButton(
                             icon: Icon(
                               isPlaying ? Icons.pause : Icons.play_arrow,
@@ -165,7 +161,7 @@ class _MainScreenState extends State<MainScreen> {
                             },
                           ),
 
-                          // Next button
+                          /// Next button
                           IconButton(
                             icon: const Icon(Icons.skip_next),
                             color: Colors.grey[700],
@@ -183,7 +179,7 @@ class _MainScreenState extends State<MainScreen> {
           ),
 
 
-          // ⚫ BOTTOM NAVIGATION BAR
+          /// ⚫ BOTTOM NAVIGATION BAR
           BottomNavigationBar(
             currentIndex: _selectedIndex,
             onTap: _onTabTapped,

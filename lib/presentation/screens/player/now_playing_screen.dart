@@ -31,7 +31,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Header
+            /// Header
             Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
@@ -57,11 +57,11 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
 
             const Spacer(),
 
-            // 🖼️ Album Art
+            ///  Album Art
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
               child: Hero(
-                tag: 'album_art_${currentSong.id}',
+                tag: 'album_art_${currentSong.id}',/// dùng để animation
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(24),
                   child: AspectRatio(
@@ -87,7 +87,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
 
             const Spacer(),
 
-            // 🎵 Song Info
+            /// 🎵 Song Info
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
               child: Column(
