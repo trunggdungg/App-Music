@@ -12,9 +12,9 @@ class AudioPlayerService {
 
   final AudioPlayer _audioPlayer = AudioPlayer();
 
-  Song? _currentSong;
-  List<Song> _playlist = [];
-  int _currentIndex = 0;
+  Song? _currentSong;/// Bài hát hiện tại
+  List<Song> _playlist = []; /// Danh sách phát hiện tại
+  int _currentIndex = 0;/// Vị trí bài hát hiện tại trong playlist
 
   // Getters
   AudioPlayer get audioPlayer => _audioPlayer;
@@ -23,10 +23,10 @@ class AudioPlayerService {
   int get currentIndex => _currentIndex;
 
   // Stream để lắng nghe trạng thái
-  Stream<Duration> get positionStream => _audioPlayer.positionStream;
-  Stream<Duration?> get durationStream => _audioPlayer.durationStream;
-  Stream<PlayerState> get playerStateStream => _audioPlayer.playerStateStream;
-  Stream<bool> get playingStream => _audioPlayer.playingStream;
+  Stream<Duration> get positionStream => _audioPlayer.positionStream;/// Vị trí phát hiện tại
+  Stream<Duration?> get durationStream => _audioPlayer.durationStream;/// Tổng thời lượng bài hát
+  Stream<PlayerState> get playerStateStream => _audioPlayer.playerStateStream;/// Trạng thái phát nhạc
+  Stream<bool> get playingStream => _audioPlayer.playingStream;/// Trạng thái đang phát hay tạm dừng
 
   /// Phát một bài hát
   Future<void> playSong(Song song, {List<Song>? playlist, int? index}) async {

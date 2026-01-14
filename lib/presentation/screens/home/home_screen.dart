@@ -1,9 +1,13 @@
 // lib/presentation/screens/home/home_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:music_app/presentation/screens/home/widgets/artist_card.dart';
+import 'package:music_app/presentation/screens/home/widgets/music_card.dart';
+import 'package:music_app/presentation/screens/home/widgets/music_list_tile.dart';
+import 'package:music_app/presentation/screens/home/widgets/section_title.dart';
+import '../../../data/models/artist.dart';
 import '../../../data/repositories/music_repository.dart';
 import '../../../data/models/song.dart';
-import '../home/widgets/section_title.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function(Song song)? onSongTap;
@@ -16,9 +20,9 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final MusicRepository _repository = LocalMusicRepository();
-
   List<Song> _recentlyPlayed = [];
   List<Song> _recommended = [];
+  List<Artist> _popularArtists = []; // ✅ THÊM
   bool _isLoading = true;
   String? _error;
 
@@ -37,10 +41,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
       final recently = await _repository.getRecentlyPlayed();
       final recommended = await _repository.getRecommendedSongs();
+      final artists = await _repository
+          .getAllArtists(); // ✅ LẤY DANH SÁCH NGHỆ SĨ
 
       setState(() {
         _recentlyPlayed = recently;
         _recommended = recommended;
+        _popularArtists = artists;
         _isLoading = false;
       });
     } catch (e) {
@@ -153,6 +160,27 @@ class _HomeScreenState extends State<HomeScreen> {
 
                       const SizedBox(height: 32),
 
+                      /// ⭐ POPULAR ARTISTS - MỚI THÊM
+                      const SectionTitle(title: "Popular Artists"),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        height: 140,
+                        child: _popularArtists.isEmpty
+                            ? const Center(child: Text('Chưa có nghệ sĩ'))
+                            : ListView.separated(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: _popularArtists.length,
+                                separatorBuilder: (_, __) =>
+                                    const SizedBox(width: 16),
+                                itemBuilder: (context, index) {
+                                  final artist = _popularArtists[index];
+                                  return ArtistCard(artist: artist);
+                                },
+                              ),
+                      ),
+
+                      const SizedBox(height: 32),
+
                       /// 🌟 Recommended
                       const SectionTitle(title: "Recommended For You"),
                       const SizedBox(height: 12),
@@ -181,107 +209,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
       ),
-    );
-  }
-}
-
-// ============ UPDATED WIDGETS ============
-
-class MusicCard extends StatelessWidget {
-  final String title;
-  final String artist;
-  final String imageUrl;
-
-  const MusicCard({
-    Key? key,
-    required this.title,
-    required this.artist,
-    required this.imageUrl,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 120,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF5FCF9),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: ClipRRect(
-              borderRadius: const BorderRadius.all(Radius.circular(12)),
-              child: Image.network(
-                imageUrl,
-                fit: BoxFit.cover,
-                width: double.infinity,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: Colors.grey[300],
-                    child: const Icon(Icons.music_note, size: 40),
-                  );
-                },
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          Text(
-            artist,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 12),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class MusicListTile extends StatelessWidget {
-  final String title;
-  final String artist;
-  final String imageUrl;
-
-  const MusicListTile({
-    Key? key,
-    required this.title,
-    required this.artist,
-    required this.imageUrl,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: Image.network(
-          imageUrl,
-          width: 56,
-          height: 56,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return Container(
-              width: 56,
-              height: 56,
-              color: Colors.grey[300],
-              child: const Icon(Icons.music_note),
-            );
-          },
-        ),
-      ),
-      title: Text(title),
-      subtitle: Text(artist),
-      trailing: const Icon(Icons.more_vert),
     );
   }
 }
