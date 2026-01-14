@@ -1,6 +1,7 @@
 // lib/presentation/screens/home/home_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:music_app/data/repositories/api_music_repository.dart';
 import 'package:music_app/presentation/screens/home/widgets/artist_card.dart';
 import 'package:music_app/presentation/screens/home/widgets/music_card.dart';
 import 'package:music_app/presentation/screens/home/widgets/music_list_tile.dart';
@@ -19,7 +20,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final MusicRepository _repository = LocalMusicRepository();
+  // final MusicRepository _repository = LocalMusicRepository();
+  final MusicRepository _repository = ApiMusicRepository();
   List<Song> _recentlyPlayed = [];
   List<Song> _recommended = [];
   List<Artist> _popularArtists = []; // ✅ THÊM
