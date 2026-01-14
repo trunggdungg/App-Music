@@ -43,8 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       final recently = await _repository.getRecentlyPlayed();
       final recommended = await _repository.getRecommendedSongs();
-      final artists = await _repository
-          .getAllArtists(); // ✅ LẤY DANH SÁCH NGHỆ SĨ
+      final artists = await _repository.getAllArtists(); // ✅ LẤY DANH SÁCH NGHỆ SĨ
 
       setState(() {
         _recentlyPlayed = recently;
