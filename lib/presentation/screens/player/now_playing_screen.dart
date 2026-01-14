@@ -110,7 +110,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              currentSong.artist,
+                              currentSong.artist.name,
                               style: TextStyle(
                                 fontSize: 16,
                                 color: Colors.grey[600],
@@ -121,7 +121,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                             if (currentSong.album != null) ...[
                               const SizedBox(height: 2),
                               Text(
-                                currentSong.album!,
+                                currentSong.album!.title,
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Colors.grey[500],
@@ -397,14 +397,14 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _infoRow('Title', song.title),
-              _infoRow('Artist', song.artist),
+              _infoRow('Artist', song.artist.imageUrl),
               if (song.album != null)
-                _infoRow('Album', song.album!),
-              if (song.releaseYear != null)
-                _infoRow('Year', song.releaseYear.toString()),
+                _infoRow('Album', song.album!.title),
+              if (song.releaseDate != null)
+                _infoRow('Year', song.releaseDate.toString()),
               _infoRow('Duration', song.durationFormatted),
-              if (song.genres.isNotEmpty)
-                _infoRow('Genres', song.genres.join(', ')),
+              // if (song.genres.isNotEmpty)
+              //   _infoRow('Genres', song.genres.join(', ')),
             ],
           ),
           actions: [

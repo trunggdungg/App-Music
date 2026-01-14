@@ -1,83 +1,83 @@
+import 'album.dart';
+import 'artist.dart';
+
 class Song {
-  final String id;
+  final int id;
   final String title;
-  final String artist;
-  final String artistId;
-  final String albumArt;
+  final Artist artist;
+  final Album album;
+  final int duration;
   final String audioUrl;
-  final int? duration; // Duration in seconds
-  final String? album;
-  final int? releaseYear;
-  final List<String> genres;
+  final String albumArt;
+  final DateTime? releaseDate;
+  final String status;
 
   Song({
-  required this.id,
-  required this.title,
-  required this.artist,
-  required this.artistId,
-  required this.albumArt,
-  required this.audioUrl,
-  this.duration,
-  this.album,
-  this.releaseYear,
-  this.genres = const [],
+    required this.id,
+    required this.title,
+    required this.artist,
+    required this.album,
+    required this.duration,
+    required this.audioUrl,
+    required this.albumArt,
+    this.releaseDate,
+    required this.status,
   });
 
-  /// Json
- factory Song.fromJson(Map<String, dynamic> json){
-   return Song(
-      id: json['id'],
-      title: json['title'],
+  factory Song.fromJson(Map<String, dynamic> json) {
+    return Song(
+      id: json['id'] as int,
+      title: json['title'] ?? '',
       artist: json['artist'],
-      artistId: json['artistId'],
-      albumArt: json['albumArt'],
-      audioUrl: json['audioUrl'],
-      duration: json['duration'],
       album: json['album'],
-      releaseYear: json['releaseYear'],
-      genres: List<String>.from(json['genres'] ?? []),
-   );
- }
+      duration: json['duration'] as int,
+      audioUrl: json['fileUrl'] ?? '',
+      // ✅ KEY ĐÚNG
+      albumArt: json['coverImageUrl'] ?? '',
+      // ✅ KEY ĐÚNG
+      releaseDate: json['releaseDate'] != null
+          ? DateTime.parse(json['releaseDate'])
+          : null,
+      status: json['status'] ?? 'UNKNOWN',
+    );
+  }
 
   /// To Json
-  Map<String, dynamic> toJson(){
+  Map<String, dynamic> toJson() {
     return {
       'id': id,
       'title': title,
       'artist': artist,
-      'artistId': artistId,
-      'albumArt': albumArt,
-      'audioUrl': audioUrl,
-      'duration': duration,
       'album': album,
-      'releaseYear': releaseYear,
-      'genres': genres,
+      'duration': duration,
+      'fileUrl': audioUrl,
+      'coverImageUrl': albumArt,
+      'releaseDate': releaseDate?.toIso8601String(),
+      'status': status,
     };
   }
 
   Song copyWith({
-    String? id,
+    int? id,
     String? title,
-    String? artist,
-    String? artistId,
-    String? albumArt,
-    String? audioUrl,
+    Artist? artist,
+    Album? album,
     int? duration,
-    String? album,
-    int? releaseYear,
-    List<String>? genres,
+    String? audioUrl,
+    String? albumArt,
+    DateTime? releaseDate,
+    String? status,
   }) {
     return Song(
       id: id ?? this.id,
       title: title ?? this.title,
       artist: artist ?? this.artist,
-      artistId: artistId ?? this.artistId,
-      albumArt: albumArt ?? this.albumArt,
-      audioUrl: audioUrl ?? this.audioUrl,
-      duration: duration ?? this.duration,
       album: album ?? this.album,
-      releaseYear: releaseYear ?? this.releaseYear,
-      genres: genres ?? this.genres,
+      duration: duration ?? this.duration,
+      audioUrl: audioUrl ?? this.audioUrl,
+      albumArt: albumArt ?? this.albumArt,
+      releaseDate: releaseDate ?? this.releaseDate,
+      status: status ?? this.status,
     );
   }
 
@@ -92,6 +92,4 @@ class Song {
     return '${minutes.toString().padLeft(2, '0')}:'
         '${seconds.toString().padLeft(2, '0')}';
   }
-
-
 }

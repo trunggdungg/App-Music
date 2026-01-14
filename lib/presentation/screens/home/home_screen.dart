@@ -32,6 +32,10 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadData();
+    _repository.getAllArtists().then((artists) {
+      print(artists);
+    });
+
   }
 
   Future<void> _loadData() async {
@@ -42,8 +46,8 @@ class _HomeScreenState extends State<HomeScreen> {
       });
 
       final recently = await _repository.getRecentlyPlayed();
-      final recommended = await _repository.getRecommendedSongs();
-      final artists = await _repository.getAllArtists(); // ✅ LẤY DANH SÁCH NGHỆ SĨ
+      final recommended = await _repository.getAllSongs();
+      final artists = await _repository.getAllArtists();
 
       setState(() {
         _recentlyPlayed = recently;
@@ -151,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     },
                                     child: MusicCard(
                                       title: song.title,
-                                      artist: song.artist,
+                                      artist: song.albumArt,
                                       imageUrl: song.albumArt,
                                     ),
                                   );
@@ -197,7 +201,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   },
                                   child: MusicListTile(
                                     title: song.title,
-                                    artist: song.artist,
+                                    artist: song.artist.imageUrl,
                                     imageUrl: song.albumArt,
                                   ),
                                 );

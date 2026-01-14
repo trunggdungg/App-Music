@@ -6,12 +6,13 @@ import 'package:music_app/data/models/artist.dart';
 import '../models/song.dart';
 
 class ApiMusicData {
-  static const String baseUrl = 'http://localhost:8083/api/songs';
+  static const String urlAllSong = 'http://10.0.2.2:8083/api/songs';
+  static const String urlAllArtist = 'http://10.0.2.2:8083/api/artists';
 
   static Future<List<Song>> getAllSongs() async {
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl'),
+        Uri.parse('$urlAllSong'),
         headers: {'Content-Type': 'application/json'},
       );
       if(response.statusCode == 200){
@@ -30,7 +31,7 @@ class ApiMusicData {
   static Future<List<Artist>> getAllArtists() async {
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:8083/api/artists'),
+        Uri.parse('$urlAllArtist'),
         headers: {'Content-Type': 'application/json'},
       );
       if(response.statusCode == 200){

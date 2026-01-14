@@ -134,7 +134,7 @@ class _MainScreenState extends State<MainScreen> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 Text(
-                                  currentSong.artist,
+                                  currentSong.artist.name,
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: Colors.grey[600],
