@@ -1,7 +1,7 @@
 // lib/data/models/artist.dart
 
 class Artist {
-  final String id;
+  final int artistId;
   final String name;
   final String imageUrl;
   final String? bio;
@@ -9,7 +9,7 @@ class Artist {
   final List<String> genres;
 
   Artist({
-    required this.id,
+    required this.artistId,
     required this.name,
     required this.imageUrl,
     this.bio,
@@ -20,21 +20,22 @@ class Artist {
   // Chuyển từ JSON (chuẩn bị cho API sau này)
   factory Artist.fromJson(Map<String, dynamic> json) {
     return Artist(
-      id: json['id'] ?? '',
+      artistId: json['artistId'] ?? 0,
       name: json['name'] ?? '',
-      imageUrl: json['imageUrl'] ?? '',
+      imageUrl: json['photoUrl'] ?? '',
       bio: json['bio'],
-      followers: json['followers'] ?? 0,
-      genres: json['genres'] != null
+      followers: json['totalFollowers'] ?? 0,
+      genres: (json['genres'] is List)
           ? List<String>.from(json['genres'])
-          : [],
+          : const [],
     );
   }
+
 
   // Chuyển sang JSON
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
+      'artistId': artistId,
       'name': name,
       'imageUrl': imageUrl,
       'bio': bio,
@@ -45,7 +46,7 @@ class Artist {
 
   // Copy with method
   Artist copyWith({
-    String? id,
+    int? artistId,
     String? name,
     String? imageUrl,
     String? bio,
@@ -53,7 +54,7 @@ class Artist {
     List<String>? genres,
   }) {
     return Artist(
-      id: id ?? this.id,
+      artistId: artistId ?? this.artistId,
       name: name ?? this.name,
       imageUrl: imageUrl ?? this.imageUrl,
       bio: bio ?? this.bio,

@@ -32,10 +32,6 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadData();
-    _repository.getAllArtists().then((artists) {
-      print(artists);
-    });
-
   }
 
   Future<void> _loadData() async {
@@ -65,6 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print('BUILD recommended length: ${_recommended.length}');
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -201,7 +198,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   },
                                   child: MusicListTile(
                                     title: song.title,
-                                    artist: song.artist.imageUrl,
+                                    artist: song.artist.name,
                                     imageUrl: song.albumArt,
                                   ),
                                 );

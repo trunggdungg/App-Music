@@ -6,8 +6,10 @@ import 'package:music_app/data/models/artist.dart';
 import '../models/song.dart';
 
 class ApiMusicData {
-  static const String urlAllSong = 'http://10.0.2.2:8083/api/songs';
-  static const String urlAllArtist = 'http://10.0.2.2:8083/api/artists';
+  static const String baseUrl = 'http://10.0.2.2:8083';
+
+  static const String urlAllSong   = '$baseUrl/api/songs';
+  static const String urlAllArtist = '$baseUrl/api/artists';
 
   static Future<List<Song>> getAllSongs() async {
     try {

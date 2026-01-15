@@ -5,7 +5,7 @@ class Song {
   final int id;
   final String title;
   final Artist artist;
-  final Album album;
+  final Album? album;
   final int duration;
   final String audioUrl;
   final String albumArt;
@@ -16,7 +16,7 @@ class Song {
     required this.id,
     required this.title,
     required this.artist,
-    required this.album,
+    this.album,
     required this.duration,
     required this.audioUrl,
     required this.albumArt,
@@ -28,13 +28,12 @@ class Song {
     return Song(
       id: json['id'] as int,
       title: json['title'] ?? '',
-      artist: json['artist'],
-      album: json['album'],
-      duration: json['duration'] as int,
+      artist: Artist.fromJson(json['artist']),
+      album: json['album'] != null ? Album.fromJson(json['album']) : null,
+
+      duration: json['duration'] ?? 0,
       audioUrl: json['fileUrl'] ?? '',
-      // ✅ KEY ĐÚNG
       albumArt: json['coverImageUrl'] ?? '',
-      // ✅ KEY ĐÚNG
       releaseDate: json['releaseDate'] != null
           ? DateTime.parse(json['releaseDate'])
           : null,
