@@ -9,6 +9,7 @@ import 'package:music_app/presentation/screens/home/widgets/section_title.dart';
 import '../../../data/models/artist.dart';
 import '../../../data/repositories/music_repository.dart';
 import '../../../data/models/song.dart';
+import '../artist/artist_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function(Song song)? onSongTap;
@@ -111,23 +112,22 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(height: 20),
 
                       /// Search box
-                      TextField(
-                        decoration: InputDecoration(
-                          hintText: "Search songs, artists...",
-                          filled: true,
-                          fillColor: const Color(0xFFF5FCF9),
-                          prefixIcon: const Icon(Icons.search),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 16,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(50),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                      ),
-
+                      // TextField(
+                      //   decoration: InputDecoration(
+                      //     hintText: "Search songs, artists...",
+                      //     filled: true,
+                      //     fillColor: const Color(0xFFF5FCF9),
+                      //     prefixIcon: const Icon(Icons.search),
+                      //     contentPadding: const EdgeInsets.symmetric(
+                      //       horizontal: 24,
+                      //       vertical: 16,
+                      //     ),
+                      //     border: OutlineInputBorder(
+                      //       borderRadius: BorderRadius.circular(50),
+                      //       borderSide: BorderSide.none,
+                      //     ),
+                      //   ),
+                      // ),
                       const SizedBox(height: 32),
 
                       /// 🎧 Recently Played
@@ -152,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     },
                                     child: MusicCard(
                                       title: song.title,
-                                      artist: song.albumArt,
+                                      artist: song.artist.name,
                                       imageUrl: song.albumArt,
                                     ),
                                   );
@@ -162,7 +162,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                       const SizedBox(height: 32),
 
-                      /// ⭐ POPULAR ARTISTS - MỚI THÊM
+                      ///  POPULAR ARTISTS
                       const SectionTitle(title: "Popular Artists"),
                       const SizedBox(height: 12),
                       SizedBox(
@@ -176,14 +176,26 @@ class _HomeScreenState extends State<HomeScreen> {
                                     const SizedBox(width: 16),
                                 itemBuilder: (context, index) {
                                   final artist = _popularArtists[index];
-                                  return ArtistCard(artist: artist);
+                                  return InkWell(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => ArtistDetailScreen(
+                                            artist: artist,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: ArtistCard(artist: artist),
+                                  );
                                 },
                               ),
                       ),
 
                       const SizedBox(height: 32),
 
-                      /// 🌟 Recommended
+                      /// Recommended
                       const SectionTitle(title: "Recommended For You"),
                       const SizedBox(height: 12),
                       _recommended.isEmpty
@@ -204,7 +216,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                 );
                               }).toList(),
                             ),
-
                       const SizedBox(height: 100),
                     ],
                   ),

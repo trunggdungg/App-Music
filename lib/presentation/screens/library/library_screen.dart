@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:music_app/presentation/screens/favorite/favorite_screen.dart';
 
 class LibraryScreen extends StatelessWidget {
   const LibraryScreen({Key? key}) : super(key: key);
@@ -12,10 +13,7 @@ class LibraryScreen extends StatelessWidget {
         elevation: 0,
         title: const Text(
           'Your Library',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         actions: [
           IconButton(
@@ -32,6 +30,9 @@ class LibraryScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: _quickAccessButton(
+                  onTap: (){
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => FavoriteScreen()));
+                  },
                   context,
                   icon: Icons.favorite,
                   label: "Liked Songs",
@@ -90,69 +91,72 @@ class LibraryScreen extends StatelessWidget {
   }
 
   Widget _quickAccessButton(
-      BuildContext context, {
-        required IconData icon,
-        required String label,
-        required Color color,
-      }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: color),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              label,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: color,
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required Color color,
+    VoidCallback? onTap,
+  }) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: color),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(fontWeight: FontWeight.bold, color: color),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildSection(
-      BuildContext context, {
-        required String title,
-        required List<_LibraryItem> items,
-      }) {
+    BuildContext context, {
+    required String title,
+    required List<_LibraryItem> items,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
-          style: Theme.of(context)
-              .textTheme
-              .titleMedium!
-              .copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium!.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
-        ...items.map((item) => ListTile(
-          contentPadding: EdgeInsets.zero,
-          leading: Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF5FCF9),
-              borderRadius: BorderRadius.circular(8),
+        ...items.map(
+          (item) => ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5FCF9),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.music_note),
             ),
-            child: const Icon(Icons.music_note),
+            title: Text(item.title),
+            subtitle: Text(item.count),
+            trailing: const Icon(Icons.more_vert),
+            onTap: () {},
           ),
-          title: Text(item.title),
-          subtitle: Text(item.count),
-          trailing: const Icon(Icons.more_vert),
-          onTap: () {},
-        )),
+        ),
       ],
     );
   }

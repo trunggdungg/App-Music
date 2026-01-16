@@ -19,6 +19,33 @@ class ApiMusicRepository implements MusicRepository {
   }
 
   @override
+  Future<List<Song>> getSongsByArtist(String artistId) async {
+    try {
+      final songs = await ApiMusicData.getSongsByArtist(artistId);
+
+      print('Songs by artist $artistId:');
+      for (var song in songs) {
+        print('- ${song.id} | ${song.title}');
+      }
+
+      return songs;
+    } catch (e) {
+      print('Error in getSongsByArtist: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<Song>> getAllFavoriteSongs() async {
+    try {
+      return await ApiMusicData.getAllFavoriteSongs();
+    } catch (e) {
+      print('Error in getAllFavoriteSongs: $e');
+      return [];
+    }
+  }
+
+  @override
   Future<List<Song>> getRecentlyPlayed() async {
     try {
       final songs = await getAllSongs();
@@ -61,12 +88,6 @@ class ApiMusicRepository implements MusicRepository {
   Future<Artist?> getArtistById(String id) async {
     // TODO: Khi backend có API /api/artists/{id}
     return null;
-  }
-
-  @override
-  Future<List<Song>> getSongsByArtist(String artistId) async {
-    // TODO: Khi backend có API /api/songs/artist/{artistId}
-    return [];
   }
 
   @override
