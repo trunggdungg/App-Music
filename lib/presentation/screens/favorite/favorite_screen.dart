@@ -1,19 +1,16 @@
 // lib/presentation/screens/home/home_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:music_app/data/models/favorite.dart';
 import 'package:music_app/data/repositories/api_music_repository.dart';
-import 'package:music_app/presentation/screens/home/widgets/artist_card.dart';
-import 'package:music_app/presentation/screens/home/widgets/music_card.dart';
 import 'package:music_app/presentation/screens/home/widgets/music_list_tile.dart';
-import 'package:music_app/presentation/screens/home/widgets/section_title.dart';
-import '../../../data/models/artist.dart';
+import 'package:music_app/services/audio_player_service.dart';
 import '../../../data/repositories/music_repository.dart';
 import '../../../data/models/song.dart';
+import '../player/now_playing_screen.dart';
 
 class FavoriteScreen extends StatefulWidget {
-  final Function(Song song)? onSongTap;
-
-  const FavoriteScreen({Key? key, this.onSongTap}) : super(key: key);
+  const FavoriteScreen({Key? key}) : super(key: key);
 
   @override
   State<FavoriteScreen> createState() => _FavoriteScreenState();
@@ -21,8 +18,8 @@ class FavoriteScreen extends StatefulWidget {
 
 class _FavoriteScreenState extends State<FavoriteScreen> {
   final MusicRepository _repository = ApiMusicRepository();
-  List<Song> _recommended = [];
-  List<Song> _favorite = [];
+  final AudioPlayerService _audioService = AudioPlayerService();
+  List<Favorite> _favorite = [];
   bool _isLoading = true;
   String? _error;
 
@@ -39,10 +36,9 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
         _error = null;
       });
 
-      final recommended = await _repository.getAllSongs();
-      final favorite = await _repository.getAllFavoriteSongs();
+      final favorite = await _repository.getFavoritesByUserId(1);
       setState(() {
-        _recommended = recommended;
+        _favorite = favorite;
         _isLoading = false;
       });
     } catch (e) {
@@ -55,7 +51,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print('BUILD favorite length: ${_recommended.length}');
+    print('BUILD favorite length: ${_favorite.length}');
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -87,10 +83,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           IconButton(
-                            icon: const Icon(
-                              Icons.navigate_before,
-                              size: 32,
-                            ),
+                            icon: const Icon(Icons.navigate_before, size: 32),
                             onPressed: () => Navigator.pop(context),
                           ),
                           const Text(
@@ -107,22 +100,27 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                         ],
                       ),
 
-                      ///
+                      /// Content
                       const SizedBox(height: 12),
-                      _recommended.isEmpty
+                      _favorite.isEmpty
                           ? const Center(child: Text('Chưa có đề xuất'))
                           : Column(
-                              children: _recommended.map((song) {
+                              children: _favorite.map((favorite) {
                                 return GestureDetector(
                                   onTap: () {
-                                    if (widget.onSongTap != null) {
-                                      widget.onSongTap!(song);
+                                    // Xử lý khi người dùng nhấn vào bài hát
+                                    print('Nhấn vào bài hát: ${favorite.song.title}');
+                                    _audioService.playSong(favorite.song);
+                                    if(mounted){
+                                      Navigator.push(
+                                          context, MaterialPageRoute(
+                                          builder: (_) => NowPlayingScreen()));
                                     }
                                   },
                                   child: MusicListTile(
-                                    title: song.title,
-                                    artist: song.artist.name,
-                                    imageUrl: song.albumArt,
+                                    title: favorite.song.title,
+                                    artist: favorite.song.artist.name,
+                                    imageUrl: favorite.song.artist.imageUrl,
                                   ),
                                 );
                               }).toList(),
