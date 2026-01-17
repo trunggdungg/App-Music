@@ -1,5 +1,6 @@
 // lib/data/repositories/music_repository.dart
 
+import '../models/favorite.dart';
 import '../models/song.dart';
 import '../models/artist.dart';
 import '../models/playlist.dart';
@@ -21,5 +22,7 @@ abstract class MusicRepository {
   Future<List<Playlist>> getAllPlaylists();
   Future<Playlist?> getPlaylistById(String id);
 
-  Future<List<Song>> getAllFavoriteSongs();
+  // Future<List<Song>> getFavoriteSongsByUserId();
+
+  Future<List<Favorite>> getFavoritesByUserId(int userId);
 }

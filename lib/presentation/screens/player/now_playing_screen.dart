@@ -397,7 +397,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _infoRow('Title', song.title),
-              _infoRow('Artist', song.artist.imageUrl),
+              _infoRow('Artist', song.artist.name),
               if (song.album != null)
                 _infoRow('Album', song.album!.title),
               if (song.releaseDate != null)
