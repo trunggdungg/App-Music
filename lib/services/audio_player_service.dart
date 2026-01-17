@@ -7,29 +7,55 @@ import '../data/models/song.dart';
 class AudioPlayerService {
   // Singleton pattern
   static final AudioPlayerService _instance = AudioPlayerService._internal();
+
   factory AudioPlayerService() => _instance;
+
   AudioPlayerService._internal();
 
   final AudioPlayer _audioPlayer = AudioPlayer();
 
-  Song? _currentSong;/// Bài hát hiện tại
-  List<Song> _playlist = []; /// Danh sách phát hiện tại
-  int _currentIndex = 0;/// Vị trí bài hát hiện tại trong playlist
+  Song? _currentSong;
+
+  /// Bài hát hiện tại
+  List<Song> _playlist = [];
+
+  /// Danh sách phát hiện tại
+  int _currentIndex = 0;
+
+  /// Vị trí bài hát hiện tại trong playlist
 
   // Getters
   AudioPlayer get audioPlayer => _audioPlayer;
+
   Song? get currentSong => _currentSong;
+
   List<Song> get playlist => _playlist;
+
   int get currentIndex => _currentIndex;
 
   // Stream để lắng nghe trạng thái
-  Stream<Duration> get positionStream => _audioPlayer.positionStream;/// Vị trí phát hiện tại
-  Stream<Duration?> get durationStream => _audioPlayer.durationStream;/// Tổng thời lượng bài hát
-  Stream<PlayerState> get playerStateStream => _audioPlayer.playerStateStream;/// Trạng thái phát nhạc
-  Stream<bool> get playingStream => _audioPlayer.playingStream;/// Trạng thái đang phát hay tạm dừng
+  Stream<Duration> get positionStream => _audioPlayer.positionStream;
+
+  /// Vị trí phát hiện tại
+  Stream<Duration?> get durationStream => _audioPlayer.durationStream;
+
+  /// Tổng thời lượng bài hát
+  Stream<PlayerState> get playerStateStream => _audioPlayer.playerStateStream;
+
+  /// Trạng thái phát nhạc
+  Stream<bool> get playingStream => _audioPlayer.playingStream;
+
+  /// Trạng thái đang phát hay tạm dừng
 
   /// Phát một bài hát
   Future<void> playSong(Song song, {List<Song>? playlist, int? index}) async {
+    /// Nếu bài hát đang phát là bài hiện tại, chỉ cần tiếp tục phát
+    if (currentSong?.id == song.id) {
+      if (!_audioPlayer.playing) {
+        await _audioPlayer.play();
+      }
+      return;
+    }
     try {
       _currentSong = song;
 
@@ -42,9 +68,8 @@ class AudioPlayerService {
       }
       // lấy duration
       final duration = await _audioPlayer.setUrl(song.audioUrl);
-      if(duration != null){
-      _currentSong = song.copyWith(duration: duration.inSeconds);
-
+      if (duration != null) {
+        _currentSong = song.copyWith(duration: duration.inSeconds);
       }
 
       // Bắt đầu phát
@@ -76,7 +101,11 @@ class AudioPlayerService {
     if (_playlist.isEmpty) return;
 
     _currentIndex = (_currentIndex + 1) % _playlist.length;
-    await playSong(_playlist[_currentIndex], playlist: _playlist, index: _currentIndex);
+    await playSong(
+      _playlist[_currentIndex],
+      playlist: _playlist,
+      index: _currentIndex,
+    );
   }
 
   /// Bài trước
@@ -84,7 +113,11 @@ class AudioPlayerService {
     if (_playlist.isEmpty) return;
 
     _currentIndex = (_currentIndex - 1 + _playlist.length) % _playlist.length;
-    await playSong(_playlist[_currentIndex], playlist: _playlist, index: _currentIndex);
+    await playSong(
+      _playlist[_currentIndex],
+      playlist: _playlist,
+      index: _currentIndex,
+    );
   }
 
   /// Tua đến vị trí cụ thể
