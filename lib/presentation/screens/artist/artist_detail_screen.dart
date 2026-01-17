@@ -4,6 +4,9 @@ import 'package:music_app/data/models/song.dart';
 import 'package:music_app/data/repositories/api_music_repository.dart';
 import 'package:music_app/data/repositories/music_repository.dart';
 
+import '../../../services/audio_player_service.dart';
+import '../player/now_playing_screen.dart';
+
 class ArtistDetailScreen extends StatefulWidget {
   final Artist artist;
 
@@ -15,6 +18,7 @@ class ArtistDetailScreen extends StatefulWidget {
 
 class _ArtistDetailScreenState extends State<ArtistDetailScreen> {
   final MusicRepository _repository = ApiMusicRepository();
+  final AudioPlayerService _audioService = AudioPlayerService();
   List<Song> _artistSongs = [];
   bool _isLoading = true;
   bool _isFollowing = false;
@@ -40,6 +44,32 @@ class _ArtistDetailScreenState extends State<ArtistDetailScreen> {
     } catch (e) {
       print('Error loading artist songs: $e');
       setState(() => _isLoading = false);
+    }
+  }
+
+  /// HÀM PHÁT NHẠC
+  void _playSong(Song song, int index) async {
+    try {
+      // Phát bài hát với toàn bộ playlist của nghệ sĩ
+      await _audioService.playSong(
+        song,
+        playlist: _artistSongs,
+        index: index,
+      );
+
+      /// CHUYỂN SANG MÀN NOW PLAYING
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const NowPlayingScreen(),
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Không thể phát bài hát: $e')),
+      );
     }
   }
 
@@ -264,7 +294,9 @@ class _ArtistDetailScreenState extends State<ArtistDetailScreen> {
                       ),
                       onTap: () {
                         // TODO: Play this song
-                        Navigator.pop(context, song);
+                        /// sau đó quay về màn hình chính và phát nhạc
+                        _playSong(song, index);
+
                       },
                     );
                   }, childCount: _artistSongs.length),
