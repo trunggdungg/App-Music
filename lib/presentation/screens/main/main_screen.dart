@@ -169,6 +169,15 @@ class _MainScreenState extends State<MainScreen> {
                               await _audioService.next();
                             },
                           ),
+
+                          /// Close button
+                          IconButton(
+                            icon: const Icon(Icons.close),
+                            color: Colors.grey[700],
+                            onPressed: () async {
+                              await _audioService.stop();
+                            },
+                          ),
                         ],
                       ),
                     ),
