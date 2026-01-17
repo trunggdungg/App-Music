@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:music_app/data/models/artist.dart';
+import 'package:music_app/data/models/favorite.dart';
 
 import '../models/song.dart';
 
@@ -10,9 +11,11 @@ class ApiMusicData {
 
   static const String urlAllSong = '$baseUrl/api/songs';
   static const String urlAllArtist = '$baseUrl/api/artists';
-  static const String urlSongsByArtist = '$baseUrl/api/artists'; // Append /{artistId}
+  static const String urlSongsByArtist =
+      '$baseUrl/api/artists'; // Append /{artistId}
 
-  static const String urlGetFavoriteByUser = '$baseUrl/api/favorites';// Append /{userId}
+  static const String urlGetFavoriteByUser =
+      '$baseUrl/api/favorites'; // Append /{userId}
 
   static Future<List<Song>> getAllSongs() async {
     try {
@@ -71,7 +74,23 @@ class ApiMusicData {
     }
   }
 
-  static Future<List<Song>> getAllFavoriteSongs() async {
-    return [];
+  static Future<List<Favorite>> getFavoriteByUserId(String userId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$urlGetFavoriteByUser/${userId}'),
+        headers: {'Content-Type': 'application/json'},
+      );
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonData = json.decode(response.body);
+        return jsonData.map((json) => Favorite.fromJson(json)).toList();
+      } else {
+        throw Exception(
+          'Failed to load favorite songs: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      print('Error fetching favorite songs: $e');
+      throw Exception('Network error: $e');
+    }
   }
 }
