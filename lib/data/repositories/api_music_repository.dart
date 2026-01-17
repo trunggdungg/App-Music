@@ -1,5 +1,6 @@
 import 'package:music_app/data/data_sources/api_music_data.dart';
 import 'package:music_app/data/models/artist.dart';
+import 'package:music_app/data/models/favorite.dart';
 
 import 'package:music_app/data/models/playlist.dart';
 
@@ -31,16 +32,6 @@ class ApiMusicRepository implements MusicRepository {
       return songs;
     } catch (e) {
       print('Error in getSongsByArtist: $e');
-      return [];
-    }
-  }
-
-  @override
-  Future<List<Song>> getAllFavoriteSongs() async {
-    try {
-      return await ApiMusicData.getAllFavoriteSongs();
-    } catch (e) {
-      print('Error in getAllFavoriteSongs: $e');
       return [];
     }
   }
@@ -112,5 +103,16 @@ class ApiMusicRepository implements MusicRepository {
   Future<Song?> getSongById(String id) {
     // TODO: implement getSongById
     throw UnimplementedError();
+  }
+
+
+  @override
+  Future<List<Favorite>> getFavoritesByUserId(int userId) async {
+    try {
+      return await ApiMusicData.getFavoriteByUserId(userId.toString());
+    } catch (e) {
+      print('Error in getFavoritesByUserId: $e');
+      return Future.value([]);
+    }
   }
 }
