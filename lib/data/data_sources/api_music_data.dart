@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:music_app/data/models/artist.dart';
 import 'package:music_app/data/models/favorite.dart';
+import 'package:music_app/data/models/search_result.dart';
 
 import '../models/song.dart';
 
@@ -11,11 +12,9 @@ class ApiMusicData {
 
   static const String urlAllSong = '$baseUrl/api/songs';
   static const String urlAllArtist = '$baseUrl/api/artists';
-  static const String urlSongsByArtist =
-      '$baseUrl/api/artists'; // Append /{artistId}
-
-  static const String urlGetFavoriteByUser =
-      '$baseUrl/api/favorites'; // Append /{userId}
+  static const String urlSongsByArtist = '$baseUrl/api/artists';
+  static const String urlGetFavoriteByUser = '$baseUrl/api/favorites';
+  static const String urlSearchSongAndArtist = '$baseUrl/api/songs/search';
 
   static Future<List<Song>> getAllSongs() async {
     try {
@@ -70,6 +69,26 @@ class ApiMusicData {
       }
     } catch (e) {
       print('Error fetching songs by artist: $e');
+      throw Exception('Network error: $e');
+    }
+  }
+
+  static Future<SearchResult> searchSongAngArtist(String query) async {
+    try {
+      final res = await http.get(
+        Uri.parse('$urlSearchSongAndArtist?query=$query'),
+        headers: {'Content-Type': 'application/json'},
+      );
+      if (res.statusCode == 200) {
+        final Map<String, dynamic> jsonData = json.decode(res.body);
+        return SearchResult.fromJson(jsonData);
+      } else {
+        throw Exception(
+          'Failed to search songs and artists: ${res.statusCode}',
+        );
+      }
+    } catch (e) {
+      print('Error searching songs and artists: $e');
       throw Exception('Network error: $e');
     }
   }

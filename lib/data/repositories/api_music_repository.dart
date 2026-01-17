@@ -3,12 +3,14 @@ import 'package:music_app/data/models/artist.dart';
 import 'package:music_app/data/models/favorite.dart';
 
 import 'package:music_app/data/models/playlist.dart';
+import 'package:music_app/data/models/search_result.dart';
 
 import 'package:music_app/data/models/song.dart';
 
 import 'music_repository.dart';
 
 class ApiMusicRepository implements MusicRepository {
+  /// lấy tất cả bài hát
   @override
   Future<List<Song>> getAllSongs() async {
     try {
@@ -18,17 +20,26 @@ class ApiMusicRepository implements MusicRepository {
       return [];
     }
   }
+/// tìm kiếm bài hát và nghệ sĩ
+  @override
+  Future<SearchResult> search(String keyword) async{
+   try{
+     return await ApiMusicData.searchSongAngArtist(keyword);
+   }catch(e){
+     print('Error in search: $e');
+      return SearchResult(songs: [], artists: [], totalSongs: 0, totalArtists: 0);
+   }
+  }
 
+  /// lấy danh sách bài hát theo nghệ sĩ
   @override
   Future<List<Song>> getSongsByArtist(String artistId) async {
     try {
       final songs = await ApiMusicData.getSongsByArtist(artistId);
-
       print('Songs by artist $artistId:');
       for (var song in songs) {
         print('- ${song.id} | ${song.title}');
       }
-
       return songs;
     } catch (e) {
       print('Error in getSongsByArtist: $e');
@@ -36,6 +47,7 @@ class ApiMusicRepository implements MusicRepository {
     }
   }
 
+  /// lấy danh sách bài hát đã nghe gần đây
   @override
   Future<List<Song>> getRecentlyPlayed() async {
     try {
@@ -47,6 +59,7 @@ class ApiMusicRepository implements MusicRepository {
     }
   }
 
+  /// lấy danh sách bài hát được đề xuất
   @override
   Future<List<Song>> getRecommendedSongs() async {
     try {
@@ -58,12 +71,7 @@ class ApiMusicRepository implements MusicRepository {
     }
   }
 
-  @override
-  Future<List<Song>> searchSongs(String query) async {
-    throw UnimplementedError();
-  }
-
-  // ✅ IMPLEMENT CÁC METHOD CÒN LẠI
+  /// lấy tất cả nghệ sĩ
   @override
   Future<List<Artist>> getAllArtists() async {
     try {
@@ -75,37 +83,7 @@ class ApiMusicRepository implements MusicRepository {
     }
   }
 
-  @override
-  Future<Artist?> getArtistById(String id) async {
-    // TODO: Khi backend có API /api/artists/{id}
-    return null;
-  }
-
-  @override
-  Future<List<Artist>> searchArtists(String query) async {
-    // TODO: Khi backend có API /api/artists/search
-    return [];
-  }
-
-  @override
-  Future<List<Playlist>> getAllPlaylists() async {
-    // TODO: Khi backend có API /api/playlists
-    return [];
-  }
-
-  @override
-  Future<Playlist?> getPlaylistById(String id) async {
-    // TODO: Khi backend có API /api/playlists/{id}
-    return null;
-  }
-
-  @override
-  Future<Song?> getSongById(String id) {
-    // TODO: implement getSongById
-    throw UnimplementedError();
-  }
-
-
+  /// lấy danh sách yêu thích của user theo userId
   @override
   Future<List<Favorite>> getFavoritesByUserId(int userId) async {
     try {

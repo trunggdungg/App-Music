@@ -39,6 +39,7 @@ dependencies:
   just_audio: ^0.10.5 # Để phát âm thanh
   audio_session: ^0.2.2 # Để quản lý phiên âm thanh
   http: ^1.2.0 # Để thực hiện các yêu cầu HTTP
+  shared_preferences: ^2.2.2 # Để lưu trữ dữ liệu cục bộ
 
 dev_dependencies:
   flutter_test:
