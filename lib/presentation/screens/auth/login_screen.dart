@@ -3,13 +3,76 @@ import 'package:music_app/presentation/screens/auth/register_screen.dart';
 import 'package:music_app/presentation/screens/home/home_screen.dart';
 import 'package:music_app/presentation/screens/main/main_screen.dart';
 
+import '../../../services/auth_service.dart';
 import 'forgot_password.dart';
 
-class SignInScreen extends StatelessWidget {
+class SignInScreen extends StatefulWidget {
+  const SignInScreen({super.key});
+
+  @override
+  State<SignInScreen> createState() => _SignInScreenState();
+}
+
+class _SignInScreenState extends State<SignInScreen> {
+
   final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _authService = AuthService();
 
-  SignInScreen({super.key});
+  bool _isLoading = false;
+  bool _obscurePassword = true;
 
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleLogin() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final result = await _authService.login(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
+
+      if (!mounted) return;
+
+      if (result['success'] == true) {
+        // Đăng nhập thành công -> chuyển màn
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result['message']),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const MainScreen()),
+        );
+      } else {
+        // Đăng nhập thất bại
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result['message']),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,6 +103,7 @@ class SignInScreen extends StatelessWidget {
                         child: Column(
                           children: [
                             TextFormField(
+                              controller: _emailController,
                               decoration: const InputDecoration(
                                 hintText: 'Email',
                                 filled: true,
@@ -65,20 +129,33 @@ class SignInScreen extends StatelessWidget {
                                 vertical: 16.0,
                               ),
                               child: TextFormField(
-                                obscureText: true,
-                                decoration: const InputDecoration(
+                                controller: _passwordController,
+                                obscureText: _obscurePassword,
+                                decoration: InputDecoration(
                                   hintText: 'Password',
                                   filled: true,
-                                  fillColor: Color(0xFFF5FCF9),
+                                  fillColor: const Color(0xFFF5FCF9),
                                   contentPadding: const EdgeInsets.symmetric(
                                     horizontal: 16.0 * 1.5,
                                     vertical: 16.0,
                                   ),
-                                  border: OutlineInputBorder(
+                                  border: const OutlineInputBorder(
                                     borderSide: BorderSide.none,
                                     borderRadius: BorderRadius.all(
                                       Radius.circular(50),
                                     ),
+                                  ),
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      _obscurePassword
+                                          ? Icons.visibility_off
+                                          : Icons.visibility,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        _obscurePassword = !_obscurePassword;
+                                      });
+                                    },
                                   ),
                                 ),
                                 onSaved: (passaword) {
@@ -87,12 +164,7 @@ class SignInScreen extends StatelessWidget {
                               ),
                             ),
                             ElevatedButton(
-                              onPressed: () {
-                                if (_formKey.currentState!.validate()) {
-                                  _formKey.currentState!.save();
-                                  // Navigate to the main screen
-                                }
-                              },
+                              onPressed: _isLoading ? null : _handleLogin,
                               style: ElevatedButton.styleFrom(
                                 elevation: 0,
                                 backgroundColor: const Color(0xFF00BF6D),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:music_app/presentation/screens/main/main_screen.dart';
 
+import '../../../services/auth_service.dart';
 import '../auth/login_screen.dart';
 import '../home/home_screen.dart';
 
@@ -13,18 +14,38 @@ class WelcomeScreen extends StatefulWidget {
 }
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
+  final _authService = AuthService();
+
   @override
   void initState() {
     super.initState();
-    // Chờ 3 giây rồi chuyển màn hình
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => SignInScreen()), // Thay NextScreen() bằng màn hình tiếp theo của bạn
-        );
-      }
-    });
+    _checkAuthStatus();
+  }
+
+  Future<void> _checkAuthStatus() async {
+    // Đợi 2 giây để hiển thị splash screen
+    await Future.delayed(const Duration(seconds: 2));
+
+    if (!mounted) return;
+
+    // Kiểm tra xem user đã đăng nhập chưa
+    final isAuthenticated = await _authService.loadAuthData();
+
+    if (!mounted) return;
+
+    if (isAuthenticated) {
+      // Đã đăng nhập -> vào màn hình chính
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const MainScreen()),
+      );
+    } else {
+      // Chưa đăng nhập -> vào màn hình login
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const SignInScreen()),
+      );
+    }
   }
 
   @override
@@ -51,7 +72,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               ErrorInfo(
                 title: "Hello and Welcome",
                 description:
-                "We're setting things up for you. This will only take a moment.",
+                    "We're setting things up for you. This will only take a moment.",
                 button: Transform.scale(
                   scale: 1.8,
                   child: const CircularProgressIndicator.adaptive(),
@@ -65,7 +86,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     );
   }
 }
-
 
 class ErrorInfo extends StatelessWidget {
   const ErrorInfo({
@@ -95,26 +115,24 @@ class ErrorInfo extends StatelessWidget {
           children: [
             Text(
               title,
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineSmall!
-                  .copyWith(fontWeight: FontWeight.bold),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall!.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            Text(
-              description,
-              textAlign: TextAlign.center,
-            ),
+            Text(description, textAlign: TextAlign.center),
             const SizedBox(height: 16 * 2.5),
             button ??
                 ElevatedButton(
                   onPressed: press,
                   style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 48),
-                      backgroundColor: Colors.black,
-                      foregroundColor: Colors.white,
-                      shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(8)))),
+                    minimumSize: const Size(double.infinity, 48),
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                    ),
+                  ),
                   child: Text(btnText ?? "Retry".toUpperCase()),
                 ),
             const SizedBox(height: 16),

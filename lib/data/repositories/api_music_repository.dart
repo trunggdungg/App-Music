@@ -7,9 +7,11 @@ import 'package:music_app/data/models/search_result.dart';
 
 import 'package:music_app/data/models/song.dart';
 
+import '../../services/auth_service.dart';
 import 'music_repository.dart';
 
 class ApiMusicRepository implements MusicRepository {
+  final AuthService _authService = AuthService();
   /// lấy tất cả bài hát
   @override
   Future<List<Song>> getAllSongs() async {
@@ -87,10 +89,67 @@ class ApiMusicRepository implements MusicRepository {
   @override
   Future<List<Favorite>> getFavoritesByUserId(int userId) async {
     try {
+      final currentUserId = _authService.currentUserId;
+
+      if (currentUserId == null) {
+        throw Exception('User chưa đăng nhập');
+      }
       return await ApiMusicData.getFavoriteByUserId(userId.toString());
     } catch (e) {
       print('Error in getFavoritesByUserId: $e');
       return Future.value([]);
+    }
+  }
+
+  /// ✅ THÊM PHƯƠNG THỨC: Lấy favorite của user hiện tại
+  Future<List<Favorite>> getCurrentUserFavorites() async {
+    final currentUserId = _authService.currentUserId;
+
+    if (currentUserId == null) {
+      throw Exception('Bạn cần đăng nhập để xem danh sách yêu thích');
+    }
+
+    return getFavoritesByUserId(currentUserId);
+  }
+
+  /// ✅ THÊM PHƯƠNG THỨC: Thêm bài hát vào yêu thích
+  Future<bool> addToFavorites(int songId) async {
+    try {
+      final currentUserId = _authService.currentUserId;
+
+      if (currentUserId == null) {
+        throw Exception('Bạn cần đăng nhập');
+      }
+
+      // TODO: Gọi API để thêm favorite
+      await ApiMusicData.addFavorite(userId: currentUserId, songId: songId);
+
+      return true;
+    } catch (e) {
+      print('Error adding to favorites: $e');
+      return false;
+    }
+  }
+
+  /// ✅ THÊM PHƯƠNG THỨC: Xóa bài hát khỏi yêu thích
+  Future<bool> removeFromFavorites(int songId) async {
+    try {
+      final currentUserId = _authService.currentUserId;
+
+      if (currentUserId == null) {
+        throw Exception('Bạn cần đăng nhập');
+      }
+
+      // TODO: Gọi API để xóa favorite
+      return await ApiMusicData.removeFavorite(
+        userId: currentUserId,
+        songId: songId,
+      );
+
+      return true;
+    } catch (e) {
+      print('Error removing from favorites: $e');
+      return false;
     }
   }
 }

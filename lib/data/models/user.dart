@@ -4,13 +4,14 @@ class User {
   final String? email;
   final String? fullName;
   final String? avatarUrl;
-
+  final bool isPremium;
   User({
     required this.id,
     required this.username,
     this.email,
     this.fullName,
     this.avatarUrl,
+    required this.isPremium,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -20,6 +21,7 @@ class User {
       email: json['email'],
       fullName: json['fullName'],
       avatarUrl: json['avatarUrl'],
+      isPremium: json['isPremium'] ?? false,
     );
   }
 
@@ -30,6 +32,7 @@ class User {
       'email': email,
       'fullName': fullName,
       'avatarUrl': avatarUrl,
+      'isPremium':isPremium
     };
   }
 }

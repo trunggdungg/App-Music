@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import '../../../data/models/song.dart';
 import '../../../services/audio_player_service.dart';
+import '../favorite/widget/FavoriteButton.dart';
 
 class NowPlayingScreen extends StatefulWidget {
   const NowPlayingScreen({Key? key}) : super(key: key);
@@ -133,15 +134,12 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                           ],
                         ),
                       ),
-                      IconButton(
-                        icon: Icon(
-                          _isFavorite ? Icons.favorite : Icons.favorite_border,
-                          color: _isFavorite ? Colors.red : Colors.grey[600],
-                          size: 28,
-                        ),
-                        onPressed: () {
+                      FavoriteButton(
+                        songId: currentSong.id,
+                        initialIsFavorite: _isFavorite,
+                        onChanged: (isFavorite) {
                           setState(() {
-                            _isFavorite = !_isFavorite;
+                            _isFavorite = isFavorite;
                           });
                         },
                       ),

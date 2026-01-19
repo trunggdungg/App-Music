@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:music_app/data/repositories/api_music_repository.dart';
+import 'package:music_app/presentation/screens/auth/profile_screen.dart';
 import 'package:music_app/presentation/screens/home/widgets/artist_card.dart';
 import 'package:music_app/presentation/screens/home/widgets/music_card.dart';
 import 'package:music_app/presentation/screens/home/widgets/music_list_tile.dart';
@@ -97,17 +98,31 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: [
                           Text(
                             "Good Morning 👋",
-                            style: Theme.of(context).textTheme.headlineSmall!
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall!
                                 .copyWith(fontWeight: FontWeight.bold),
                           ),
-                          const CircleAvatar(
-                            radius: 20,
-                            backgroundImage: NetworkImage(
-                              "https://i.pravatar.cc/150",
+                          InkWell(
+                            borderRadius: BorderRadius.circular(20),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const ProfileScreen(),
+                                ),
+                              );
+                            },
+                            child: const CircleAvatar(
+                              radius: 20,
+                              backgroundImage: NetworkImage(
+                                "https://i.pravatar.cc/150",
+                              ),
                             ),
                           ),
                         ],
                       ),
+
 
                       const SizedBox(height: 20),
 
