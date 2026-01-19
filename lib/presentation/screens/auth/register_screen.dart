@@ -56,7 +56,7 @@ class SignUpScreen extends StatelessWidget {
                       const SizedBox(height: 16.0),
                       TextFormField(
                         decoration: const InputDecoration(
-                          hintText: 'Phone',
+                          hintText: 'Email',
                           filled: true,
                           fillColor: Color(0xFFF5FCF9),
                           contentPadding: EdgeInsets.symmetric(
@@ -66,7 +66,7 @@ class SignUpScreen extends StatelessWidget {
                             borderRadius: BorderRadius.all(Radius.circular(50)),
                           ),
                         ),
-                        keyboardType: TextInputType.phone,
+                        keyboardType: TextInputType.emailAddress,
                         onSaved: (phone) {
                           // Save it
                         },
@@ -87,28 +87,30 @@ class SignUpScreen extends StatelessWidget {
                             ),
                           ),
                           obscureText: true,
-                          onSaved: (passaword) {
+                          onSaved: (password) {
                             // Save it
                           },
                         ),
                       ),
-                      DropdownButtonFormField(
-                        items: countries,
-                        icon: const Icon(Icons.expand_more),
-                        onSaved: (country) {
-                          // save it
-                        },
-                        onChanged: (value) {},
-                        decoration: const InputDecoration(
-                          hintText: 'Country',
-                          filled: true,
-                          fillColor: Color(0xFFF5FCF9),
-                          contentPadding: EdgeInsets.symmetric(
-                              horizontal: 16.0 * 1.5, vertical: 16.0),
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                            borderRadius: BorderRadius.all(Radius.circular(50)),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16.0),
+                        child: TextFormField(
+                          decoration: const InputDecoration(
+                            hintText: 'Confirm Password',
+                            filled: true,
+                            fillColor: Color(0xFFF5FCF9),
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16.0 * 1.5, vertical: 16.0),
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide.none,
+                              borderRadius:
+                              BorderRadius.all(Radius.circular(50)),
+                            ),
                           ),
+                          obscureText: true,
+                          onSaved: (confirmPassword) {
+                            // Save it
+                          },
                         ),
                       ),
                       Padding(
@@ -165,15 +167,3 @@ class SignUpScreen extends StatelessWidget {
   }
 }
 
-// only for demo
-List<DropdownMenuItem<String>>? countries = [
-  "Bangladesh",
-  "Switzerland",
-  'Canada',
-  'Japan',
-  'Germany',
-  'Australia',
-  'Sweden',
-].map<DropdownMenuItem<String>>((String value) {
-  return DropdownMenuItem<String>(value: value, child: Text(value));
-}).toList();

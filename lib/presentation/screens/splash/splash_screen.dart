@@ -21,7 +21,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       if (mounted) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => MainScreen()), // Thay NextScreen() bằng màn hình tiếp theo của bạn
+          MaterialPageRoute(builder: (context) => SignInScreen()), // Thay NextScreen() bằng màn hình tiếp theo của bạn
         );
       }
     });

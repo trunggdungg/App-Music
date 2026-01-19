@@ -24,7 +24,7 @@ class ForgotPasswordScreen extends StatelessWidget {
               key: _formKey,
               child: TextFormField(
                 decoration: const InputDecoration(
-                  hintText: 'Phone',
+                  hintText: 'Email',
                   filled: true,
                   fillColor: Color(0xFFF5FCF9),
                   contentPadding: EdgeInsets.symmetric(
@@ -34,7 +34,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                     borderRadius: BorderRadius.all(Radius.circular(50)),
                   ),
                 ),
-                keyboardType: TextInputType.phone,
+                keyboardType: TextInputType.emailAddress,
                 onSaved: (phone) {
                   // Save it
                 },
