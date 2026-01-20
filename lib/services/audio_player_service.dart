@@ -3,59 +3,55 @@
 import 'package:just_audio/just_audio.dart';
 import '../data/models/song.dart';
 
-/// Service quản lý việc phát nhạc toàn ứng dụng
 class AudioPlayerService {
-  // Singleton pattern
   static final AudioPlayerService _instance = AudioPlayerService._internal();
-
   factory AudioPlayerService() => _instance;
-
-  AudioPlayerService._internal();
+  AudioPlayerService._internal() {
+    _init();
+  }
 
   final AudioPlayer _audioPlayer = AudioPlayer();
-
   Song? _currentSong;
-
-  /// Bài hát hiện tại
   List<Song> _playlist = [];
-
-  /// Danh sách phát hiện tại
   int _currentIndex = 0;
-
-  /// Vị trí bài hát hiện tại trong playlist
 
   // Getters
   AudioPlayer get audioPlayer => _audioPlayer;
-
   Song? get currentSong => _currentSong;
-
   List<Song> get playlist => _playlist;
-
   int get currentIndex => _currentIndex;
+  bool get hasNext => _currentIndex < _playlist.length - 1;
+  bool get hasPrevious => _currentIndex > 0;
 
-  // Stream để lắng nghe trạng thái
+  // Streams
   Stream<Duration> get positionStream => _audioPlayer.positionStream;
-
-  /// Vị trí phát hiện tại
   Stream<Duration?> get durationStream => _audioPlayer.durationStream;
-
-  /// Tổng thời lượng bài hát
   Stream<PlayerState> get playerStateStream => _audioPlayer.playerStateStream;
-
-  /// Trạng thái phát nhạc
   Stream<bool> get playingStream => _audioPlayer.playingStream;
 
-  /// Trạng thái đang phát hay tạm dừng
+
+  void _init() {
+    // Tự động phát bài tiếp theo khi bài hiện tại kết thúc
+    _audioPlayer.playerStateStream.listen((state) {
+      if (state.processingState == ProcessingState.completed) {
+        // Kiểm tra loop mode
+        if (_audioPlayer.loopMode == LoopMode.off && hasNext) {
+          next();
+        } else if (_audioPlayer.loopMode == LoopMode.all && !hasNext) {
+          // Quay lại bài đầu tiên
+          _currentIndex = 0;
+          playSong(_playlist[0], playlist: _playlist, index: 0);
+        }
+      }
+    });
+  }
 
   /// Phát một bài hát
   Future<void> playSong(Song song, {List<Song>? playlist, int? index}) async {
-    /// Nếu bài hát đang phát là bài hiện tại, chỉ cần tiếp tục phát
-    if (currentSong?.id == song.id) {
-      if (!_audioPlayer.playing) {
-        await _audioPlayer.play();
-      }
+    if (currentSong?.id == song.id && _audioPlayer.playing) {
       return;
     }
+
     try {
       _currentSong = song;
 
@@ -66,13 +62,13 @@ class AudioPlayerService {
         _playlist = [song];
         _currentIndex = 0;
       }
-      // lấy duration
+
+      // Load và phát nhạc
       final duration = await _audioPlayer.setUrl(song.audioUrl);
       if (duration != null) {
         _currentSong = song.copyWith(duration: duration.inSeconds);
       }
 
-      // Bắt đầu phát
       await _audioPlayer.play();
     } catch (e) {
       print('Lỗi khi phát nhạc: $e');
@@ -90,6 +86,15 @@ class AudioPlayerService {
     await _audioPlayer.play();
   }
 
+  /// Toggle play/pause
+  Future<void> togglePlayPause() async {
+    if (_audioPlayer.playing) {
+      await pause();
+    } else {
+      await resume();
+    }
+  }
+
   /// Dừng hoàn toàn
   Future<void> stop() async {
     await _audioPlayer.stop();
@@ -100,7 +105,33 @@ class AudioPlayerService {
   Future<void> next() async {
     if (_playlist.isEmpty) return;
 
-    _currentIndex = (_currentIndex + 1) % _playlist.length;
+    // Nếu đang shuffle
+    if (_audioPlayer.shuffleModeEnabled) {
+      // Random một bài khác
+      int newIndex;
+      do {
+        newIndex = DateTime.now().millisecond % _playlist.length;
+      } while (newIndex == _currentIndex && _playlist.length > 1);
+
+      _currentIndex = newIndex;
+    } else {
+      // Kiểm tra loop mode
+      if (_audioPlayer.loopMode == LoopMode.one) {
+        // Phát lại bài hiện tại
+        await seek(Duration.zero);
+        await resume();
+        return;
+      } else if (hasNext) {
+        _currentIndex++;
+      } else if (_audioPlayer.loopMode == LoopMode.all) {
+        // Quay lại bài đầu
+        _currentIndex = 0;
+      } else {
+        // Đã hết playlist và không loop
+        return;
+      }
+    }
+
     await playSong(
       _playlist[_currentIndex],
       playlist: _playlist,
@@ -112,7 +143,41 @@ class AudioPlayerService {
   Future<void> previous() async {
     if (_playlist.isEmpty) return;
 
-    _currentIndex = (_currentIndex - 1 + _playlist.length) % _playlist.length;
+    // Nếu đã phát > 3 giây, restart bài hiện tại
+    final position = _audioPlayer.position;
+    if (position.inSeconds > 3) {
+      await seek(Duration.zero);
+      return;
+    }
+
+    // Nếu đang shuffle
+    if (_audioPlayer.shuffleModeEnabled) {
+      // Random một bài khác
+      int newIndex;
+      do {
+        newIndex = DateTime.now().millisecond % _playlist.length;
+      } while (newIndex == _currentIndex && _playlist.length > 1);
+
+      _currentIndex = newIndex;
+    } else {
+      // Kiểm tra loop mode
+      if (_audioPlayer.loopMode == LoopMode.one) {
+        // Phát lại bài hiện tại
+        await seek(Duration.zero);
+        await resume();
+        return;
+      } else if (hasPrevious) {
+        _currentIndex--;
+      } else if (_audioPlayer.loopMode == LoopMode.all) {
+        // Quay về bài cuối
+        _currentIndex = _playlist.length - 1;
+      } else {
+        // Đã ở đầu playlist và không loop
+        await seek(Duration.zero);
+        return;
+      }
+    }
+
     await playSong(
       _playlist[_currentIndex],
       playlist: _playlist,
@@ -130,17 +195,123 @@ class AudioPlayerService {
     await _audioPlayer.setLoopMode(mode);
   }
 
+  /// Cycle qua các loop modes: off -> all -> one -> off
+  Future<void> cycleLoopMode() async {
+    final currentMode = _audioPlayer.loopMode;
+    LoopMode nextMode;
+
+    switch (currentMode) {
+      case LoopMode.off:
+        nextMode = LoopMode.all;
+        break;
+      case LoopMode.all:
+        nextMode = LoopMode.one;
+        break;
+      case LoopMode.one:
+        nextMode = LoopMode.off;
+        break;
+    }
+
+    await setLoopMode(nextMode);
+  }
+
   /// Set chế độ shuffle
   Future<void> setShuffleMode(bool enabled) async {
     await _audioPlayer.setShuffleModeEnabled(enabled);
   }
 
-  /// Set âm lượng (0.0 - 1.0)
-  Future<void> setVolume(double volume) async {
-    await _audioPlayer.setVolume(volume);
+  /// Toggle shuffle mode
+  Future<void> toggleShuffle() async {
+    await setShuffleMode(!_audioPlayer.shuffleModeEnabled);
   }
 
-  /// Dispose khi không dùng nữa
+  /// Set âm lượng (0.0 - 1.0)
+  Future<void> setVolume(double volume) async {
+    await _audioPlayer.setVolume(volume.clamp(0.0, 1.0));
+  }
+
+  /// Tăng âm lượng
+  Future<void> increaseVolume([double amount = 0.1]) async {
+    final currentVolume = _audioPlayer.volume;
+    await setVolume(currentVolume + amount);
+  }
+
+  /// Giảm âm lượng
+  Future<void> decreaseVolume([double amount = 0.1]) async {
+    final currentVolume = _audioPlayer.volume;
+    await setVolume(currentVolume - amount);
+  }
+
+  /// Tua tới 10 giây
+  Future<void> seekForward([int seconds = 10]) async {
+    final position = _audioPlayer.position;
+    final duration = _audioPlayer.duration ?? Duration.zero;
+    final newPosition = position + Duration(seconds: seconds);
+
+    if (newPosition < duration) {
+      await seek(newPosition);
+    } else {
+      await seek(duration);
+    }
+  }
+
+  /// Tua lùi 10 giây
+  Future<void> seekBackward([int seconds = 10]) async {
+    final position = _audioPlayer.position;
+    final newPosition = position - Duration(seconds: seconds);
+
+    if (newPosition > Duration.zero) {
+      await seek(newPosition);
+    } else {
+      await seek(Duration.zero);
+    }
+  }
+
+  /// Phát bài hát theo index
+  Future<void> playAtIndex(int index) async {
+    if (index < 0 || index >= _playlist.length) return;
+
+    _currentIndex = index;
+    await playSong(
+      _playlist[index],
+      playlist: _playlist,
+      index: index,
+    );
+  }
+
+  /// Thêm bài vào queue
+  void addToQueue(Song song) {
+    _playlist.add(song);
+  }
+
+  /// Thêm nhiều bài vào queue
+  void addAllToQueue(List<Song> songs) {
+    _playlist.addAll(songs);
+  }
+
+  /// Xóa bài khỏi queue
+  void removeFromQueue(int index) {
+    if (index < 0 || index >= _playlist.length) return;
+
+    if (index == _currentIndex) {
+      // Nếu đang phát bài này, phát bài tiếp theo
+      next();
+    } else if (index < _currentIndex) {
+      // Điều chỉnh index hiện tại
+      _currentIndex--;
+    }
+
+    _playlist.removeAt(index);
+  }
+
+  /// Clear queue
+  void clearQueue() {
+    stop();
+    _playlist.clear();
+    _currentIndex = 0;
+  }
+
+  /// Dispose
   void dispose() {
     _audioPlayer.dispose();
   }
