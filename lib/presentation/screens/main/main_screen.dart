@@ -1,4 +1,4 @@
-// lib/presentation/screens/main/main_screen.dart
+// lib/presentation/screens/main/main_screen.dart - FIXED VERSION
 
 import 'package:flutter/material.dart';
 import '../../../data/models/song.dart';
@@ -19,26 +19,19 @@ class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
   final AudioPlayerService _audioService = AudioPlayerService();
 
-  // @override
-  // void dispose() {
-  //   // Không dispose audioService ở đây vì nó là singleton
-  //   super.dispose();
-  // }
-/// Hàm xử lý khi nhấn vào tab ở Bottom Navigation Bar
   void _onTabTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+    setState(() => _selectedIndex = index);
   }
 
-  /// Hàm phát nhạc nhận Song object
   void _playSong(Song song) async {
     try {
       await _audioService.playSong(song);
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Không thể phát bài hát: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Không thể phát bài hát: $e')),
+        );
+      }
     }
   }
 
@@ -58,12 +51,12 @@ class _MainScreenState extends State<MainScreen> {
       bottomNavigationBar: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // 🎵 MINI PLAYER
+          // ✅ MINI PLAYER - LẮNG NGHE currentSongStream
           StreamBuilder<Song?>(
-            stream: Stream.periodic(const Duration(milliseconds: 100))
-                .map((_) => _audioService.currentSong),
-            builder: (context, snapshot) {
-              final currentSong = snapshot.data;
+            stream: _audioService.currentSongStream,
+            initialData: _audioService.currentSong,
+            builder: (context, songSnapshot) {
+              final currentSong = songSnapshot.data;
 
               if (currentSong == null) {
                 return const SizedBox.shrink();
@@ -76,6 +69,7 @@ class _MainScreenState extends State<MainScreen> {
 
                   return GestureDetector(
                     onTap: () {
+                      // ✅ CHỈ NAVIGATE NẾU CHƯA Ở NowPlayingScreen
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -98,11 +92,12 @@ class _MainScreenState extends State<MainScreen> {
                       ),
                       child: Row(
                         children: [
-                          /// image album art
+                          /// Album art - ✅ THÊM KEY
                           ClipRRect(
                             borderRadius: BorderRadius.circular(8),
                             child: Image.network(
                               currentSong.albumArt,
+                              key: ValueKey('mini_${currentSong.id}'), // ✅ FORCE REBUILD
                               width: 48,
                               height: 48,
                               fit: BoxFit.cover,
@@ -118,7 +113,7 @@ class _MainScreenState extends State<MainScreen> {
                           ),
                           const SizedBox(width: 12),
 
-                          /// thông tin bài hát
+                          /// Song info - ✅ THÊM KEY
                           Expanded(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -126,6 +121,7 @@ class _MainScreenState extends State<MainScreen> {
                               children: [
                                 Text(
                                   currentSong.title,
+                                  key: ValueKey('mini_title_${currentSong.id}'), // ✅ FORCE REBUILD
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 14,
@@ -135,6 +131,7 @@ class _MainScreenState extends State<MainScreen> {
                                 ),
                                 Text(
                                   currentSong.artist.name,
+                                  key: ValueKey('mini_artist_${currentSong.id}'), // ✅ FORCE REBUILD
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: Colors.grey[600],
@@ -187,8 +184,7 @@ class _MainScreenState extends State<MainScreen> {
             },
           ),
 
-
-          /// ⚫ BOTTOM NAVIGATION BAR
+          /// Bottom Navigation Bar
           BottomNavigationBar(
             currentIndex: _selectedIndex,
             onTap: _onTabTapped,
