@@ -1,4 +1,4 @@
-// lib/presentation/widgets/favorite_button.dart
+// lib/presentation/screens/favorite/widget/FavoriteButton.dart
 
 import 'package:flutter/material.dart';
 import 'package:music_app/data/repositories/api_music_repository.dart';
@@ -30,8 +30,26 @@ class _FavoriteButtonState extends State<FavoriteButton> {
   void initState() {
     super.initState();
     _isFavorite = widget.initialIsFavorite;
+    _checkFavoriteStatus(); // ✅ Kiểm tra trạng thái khi khởi tạo
   }
 
+  /// ✅ KIỂM TRA TRẠNG THÁI YÊU THÍCH KHI KHỞI TẠO
+  Future<void> _checkFavoriteStatus() async {
+    if (_authService.currentUserId == null) return;
+
+    try {
+      final isFavorite = await _repository.isFavorite(widget.songId);
+      if (mounted) {
+        setState(() {
+          _isFavorite = isFavorite;
+        });
+      }
+    } catch (e) {
+      print('❌ Error checking favorite status: $e');
+    }
+  }
+
+  /// ✅ TOGGLE FAVORITE - IMPROVED
   Future<void> _toggleFavorite() async {
     // Kiểm tra đăng nhập
     if (_authService.currentUserId == null) {
@@ -40,31 +58,54 @@ class _FavoriteButtonState extends State<FavoriteButton> {
           const SnackBar(
             content: Text('Bạn cần đăng nhập để sử dụng chức năng này'),
             backgroundColor: Colors.orange,
+            duration: Duration(seconds: 2),
           ),
         );
       }
       return;
     }
 
-    setState(() => _isLoading = true);
+    // Lưu trạng thái cũ để rollback nếu có lỗi
+    final oldState = _isFavorite;
+
+    // Optimistic update - cập nhật UI ngay
+    setState(() {
+      _isFavorite = !_isFavorite;
+      _isLoading = true;
+    });
 
     try {
       bool success;
 
-      if (_isFavorite) {
+      if (oldState) {
         // Xóa khỏi yêu thích
+        print('🗑️ Removing from favorites...');
         success = await _repository.removeFromFavorites(widget.songId);
       } else {
         // Thêm vào yêu thích
+        print('❤️ Adding to favorites...');
         success = await _repository.addToFavorites(widget.songId);
       }
 
-      if (success && mounted) {
+      if (!success && mounted) {
+        // Rollback nếu thất bại
         setState(() {
-          _isFavorite = !_isFavorite;
+          _isFavorite = oldState;
         });
 
-        // Callback
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              oldState
+                  ? 'Không thể xóa khỏi yêu thích'
+                  : 'Không thể thêm vào yêu thích',
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      } else if (mounted) {
+        // Callback khi thành công
         widget.onChanged?.call(_isFavorite);
 
         // Hiển thị thông báo
@@ -72,20 +113,28 @@ class _FavoriteButtonState extends State<FavoriteButton> {
           SnackBar(
             content: Text(
               _isFavorite
-                  ? 'Đã thêm vào yêu thích'
-                  : 'Đã xóa khỏi yêu thích',
+                  ? '❤️ Đã thêm vào yêu thích'
+                  : '💔 Đã xóa khỏi yêu thích',
             ),
-            backgroundColor: Colors.green,
+            backgroundColor: _isFavorite ? Colors.green : Colors.grey[700],
             duration: const Duration(seconds: 1),
           ),
         );
       }
     } catch (e) {
+      print('❌ Toggle favorite error: $e');
+
       if (mounted) {
+        // Rollback về trạng thái cũ
+        setState(() {
+          _isFavorite = oldState;
+        });
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Lỗi: $e'),
+            content: Text('Lỗi: ${e.toString()}'),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 2),
           ),
         );
       }
@@ -102,7 +151,10 @@ class _FavoriteButtonState extends State<FavoriteButton> {
       return const SizedBox(
         width: 24,
         height: 24,
-        child: CircularProgressIndicator(strokeWidth: 2),
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00BF6D)),
+        ),
       );
     }
 
@@ -112,6 +164,7 @@ class _FavoriteButtonState extends State<FavoriteButton> {
         color: _isFavorite ? Colors.red : Colors.grey[600],
       ),
       onPressed: _toggleFavorite,
+      tooltip: _isFavorite ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích',
     );
   }
 }

@@ -101,7 +101,8 @@ class ApiMusicRepository implements MusicRepository {
     }
   }
 
-  /// ✅ THÊM PHƯƠNG THỨC: Lấy favorite của user hiện tại
+
+  /// ✅ GET CURRENT USER FAVORITES
   Future<List<Favorite>> getCurrentUserFavorites() async {
     final currentUserId = _authService.currentUserId;
 
@@ -112,7 +113,7 @@ class ApiMusicRepository implements MusicRepository {
     return getFavoritesByUserId(currentUserId);
   }
 
-  /// ✅ THÊM PHƯƠNG THỨC: Thêm bài hát vào yêu thích
+  /// ✅ ADD TO FAVORITES - FIXED
   Future<bool> addToFavorites(int songId) async {
     try {
       final currentUserId = _authService.currentUserId;
@@ -121,17 +122,22 @@ class ApiMusicRepository implements MusicRepository {
         throw Exception('Bạn cần đăng nhập');
       }
 
-      // TODO: Gọi API để thêm favorite
-      await ApiMusicData.addFavorite(userId: currentUserId, songId: songId);
+      print('🎵 Adding song $songId to favorites for user $currentUserId');
 
+      await ApiMusicData.addFavorite(
+        userId: currentUserId,
+        songId: songId,
+      );
+
+      print('✅ Successfully added to favorites');
       return true;
     } catch (e) {
-      print('Error adding to favorites: $e');
-      return false;
+      print('❌ Error adding to favorites: $e');
+      rethrow; // Throw lại để FavoriteButton xử lý
     }
   }
 
-  /// ✅ THÊM PHƯƠNG THỨC: Xóa bài hát khỏi yêu thích
+  /// ✅ REMOVE FROM FAVORITES - FIXED
   Future<bool> removeFromFavorites(int songId) async {
     try {
       final currentUserId = _authService.currentUserId;
@@ -140,15 +146,39 @@ class ApiMusicRepository implements MusicRepository {
         throw Exception('Bạn cần đăng nhập');
       }
 
-      // TODO: Gọi API để xóa favorite
-      return await ApiMusicData.removeFavorite(
+      print('🗑️ Removing song $songId from favorites for user $currentUserId');
+
+      final success = await ApiMusicData.removeFavorite(
         userId: currentUserId,
         songId: songId,
       );
 
-      return true;
+      if (success) {
+        print('✅ Successfully removed from favorites');
+      }
+
+      return success;
     } catch (e) {
-      print('Error removing from favorites: $e');
+      print('❌ Error removing from favorites: $e');
+      rethrow;
+    }
+  }
+
+  /// ✅ CHECK IF SONG IS FAVORITE - MỚI THÊM
+  Future<bool> isFavorite(int songId) async {
+    try {
+      final currentUserId = _authService.currentUserId;
+
+      if (currentUserId == null) {
+        return false;
+      }
+
+      return await ApiMusicData.checkFavoriteStatus(
+        userId: currentUserId,
+        songId: songId,
+      );
+    } catch (e) {
+      print('❌ Error checking favorite status: $e');
       return false;
     }
   }

@@ -135,13 +135,16 @@ class ApiMusicData {
     }
   }
 
+  /// ✅ ADD FAVORITE - FIXED
   static Future<Favorite> addFavorite({
     required int userId,
     required int songId,
   }) async {
     try {
+      print('📤 Adding favorite - userId: $userId, songId: $songId');
+
       final response = await http.post(
-        Uri.parse('$urlGetFavoriteByUser'),
+        Uri.parse(urlGetFavoriteByUser),
         headers: {
           ..._getHeaders(),
           'Content-Type': 'application/json',
@@ -152,32 +155,46 @@ class ApiMusicData {
         }),
       );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final Map<String, dynamic> jsonData = json.decode(response.body);
-        return Favorite.fromJson(jsonData);
+      print('📥 Add favorite response: ${response.statusCode}');
+      print('📥 Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+
+        // ⚠️ Backend trả về { success, message, favorite }
+        if (data['success'] == true && data['favorite'] != null) {
+          return Favorite.fromJson(data['favorite']);
+        } else {
+          throw Exception(data['message'] ?? 'Thêm favorite thất bại');
+        }
       } else if (response.statusCode == 401) {
         await _authService.logout();
         throw Exception('Phiên đăng nhập hết hạn');
       } else {
-        throw Exception(
-          'Failed to add favorite: ${response.statusCode} - ${response.body}',
-        );
+        final errorData = json.decode(response.body);
+        throw Exception(errorData['message'] ?? 'Lỗi thêm favorite');
       }
     } catch (e) {
-      print('Error adding favorite: $e');
-      throw Exception('Network error: $e');
+      print('❌ Error adding favorite: $e');
+      rethrow;
     }
   }
 
+  /// ✅ REMOVE FAVORITE - FIXED
   static Future<bool> removeFavorite({
     required int userId,
     required int songId,
   }) async {
     try {
+      print('🗑️ Removing favorite - userId: $userId, songId: $songId');
+
       final response = await http.delete(
-        Uri.parse('${urlGetFavoriteByUser}/$userId/$songId'),
+        Uri.parse('$urlGetFavoriteByUser/$userId/$songId'),
         headers: _getHeaders(),
       );
+
+      print('📥 Remove favorite response: ${response.statusCode}');
+      print('📥 Response body: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -186,13 +203,35 @@ class ApiMusicData {
         await _authService.logout();
         throw Exception('Phiên đăng nhập hết hạn');
       } else {
-        throw Exception(
-          'Failed to remove favorite: ${response.statusCode} - ${response.body}',
-        );
+        final errorData = json.decode(response.body);
+        throw Exception(errorData['message'] ?? 'Lỗi xóa favorite');
       }
     } catch (e) {
-      print('Error removing favorite: $e');
+      print('❌ Error removing favorite: $e');
       rethrow;
+    }
+  }
+
+  /// ✅ CHECK FAVORITE STATUS - MỚI THÊM
+  static Future<bool> checkFavoriteStatus({
+    required int userId,
+    required int songId,
+  }) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$urlGetFavoriteByUser/$userId/check/$songId'),
+        headers: _getHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['isFavorite'] ?? false;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print('❌ Error checking favorite status: $e');
+      return false;
     }
   }
 
