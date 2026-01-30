@@ -2,11 +2,11 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-
+import '../data/data_sources/api_music_data.dart';
 import '../data/models/user.dart';
 
 class AuthService {
-  static const String baseUrl = 'http://10.0.2.2:8083/api/auth';
+  // static const String baseUrl = 'http://10.0.2.2:8083/api/auth';
 
   static final AuthService _instance = AuthService._internal();
 
@@ -31,7 +31,7 @@ class AuthService {
   }) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/login'),
+        Uri.parse('${ApiMusicData.urlLogin}/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'password': password}),
       );
@@ -67,7 +67,7 @@ class AuthService {
   }) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/register'),
+        Uri.parse('${ApiMusicData.urlLogin}/register'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'email': email,
@@ -126,7 +126,7 @@ class AuthService {
 
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/verify'),
+        Uri.parse('${ApiMusicData.urlLogin}/verify'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $_token',

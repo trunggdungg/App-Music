@@ -10,7 +10,10 @@ import '../models/song.dart';
 
 class ApiMusicData {
   static const String baseUrl = 'http://10.0.2.2:8083';
+  /// auth
+  static const String urlLogin = '$baseUrl/api/auth';
 
+  /// data music
   static const String urlAllSong = '$baseUrl/api/songs';
   static const String urlAllArtist = '$baseUrl/api/artists';
   static const String urlSongsByArtist = '$baseUrl/api/artists';

@@ -50,28 +50,29 @@ class _ArtistDetailScreenState extends State<ArtistDetailScreen> {
   /// HÀM PHÁT NHẠC
   void _playSong(Song song, int index) async {
     try {
-      // Phát bài hát với toàn bộ playlist của nghệ sĩ
+      // 🔥 Luôn chuyển sang NowPlaying trước
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const NowPlayingScreen(),
+          ),
+        );
+      }
+
+      // 🔥 Sau đó mới play (UI đã sẵn sàng lắng nghe stream)
       await _audioService.playSong(
         song,
         playlist: _artistSongs,
         index: index,
       );
-
-      /// CHUYỂN SANG MÀN NOW PLAYING
-      if (mounted) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const NowPlayingScreen(),
-          ),
-        );
-      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Không thể phát bài hát: $e')),
       );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
